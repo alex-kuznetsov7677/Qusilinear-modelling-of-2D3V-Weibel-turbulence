@@ -1,0 +1,35 @@
+start_level_F_modes = 0.0045
+start_level_TS_modes = 0.00003
+
+
+V_stream = 0.4
+Beta_bkg = 0.1
+Beta_stream = 0.1
+ratio = 0.01
+
+
+Tmax = 100
+dt = 0.2
+
+
+setkaBB = 300
+ratio_Vminx_to_Beta_bkg = -4
+ratio_Vminy_to_Beta_bkg = -4
+ratio_Vstepx_multiple_setkaBB_to_Beta_bkg = 8  
+ratio_Vstepy_to_Vstepx=1.2 
+
+
+Ngarmonik_TS_x = 10
+Ngarmonik_TS_y = 60
+Ngarmonik_F_x = 30
+Ngarmonik_F_y = 10
+
+
+kmin_x_TS = -0.45
+kstep_x_TS = 0.1
+kmin_y_TS = 2.5
+kstep_y_TS = 0.05
+kmin_x_F = 0.12
+kstep_x_F = 0.03
+kmin_y_F = -0.06
+kstep_y_F = 0.012
