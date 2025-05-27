@@ -16,7 +16,7 @@ double A = -10;
 double Beta_perp = 0.1;
 
 double Pi = 3.14159265;
-double Tmax = 650.;				// время работы программы
+double Tmax = 100.;				// время работы программы
 double dt = 0.04;
 int setkaBB = 80;
 int setkaBBkvadr = setkaBB * setkaBB;
@@ -99,9 +99,9 @@ void  Postanovka1(std::vector<double>& Kxvector, std::vector<double>& Kzvector) 
 
 
 
-complex<double>DifY(long int& fk, std::vector<complex<double> >& fka) {
+complex<double>DifY(int& fk, std::vector<complex<double> >& fka) {
 	complex<double> k;
-	//long int fk = N;
+
 	if (fk - setkaBB != 0 && (fk - setkaBBminus) % setkaBB != 0) {
 		return k = (fka[fk + 1] - fka[fk - 1]) / dBBY2;
 
@@ -113,10 +113,10 @@ complex<double>DifY(long int& fk, std::vector<complex<double> >& fka) {
 	}
 
 }
-complex<double>DifZ(long int& fk, std::vector<complex<double> >& fka, int& p) {
+complex<double>DifZ(int& fk, std::vector<complex<double> >& fka, int& p) {
 	complex<double> k;
 
-	long int N = fk - fk % setkaBBkvadr;
+	int N = fk - fk % setkaBBkvadr;
 	if (N % setkaBBkub != 0 && (N - setkaBBminus * setkaBBkvadr) % setkaBBkub != 0) {
 		return k = (fka[fk + setkaBBkvadr] - fka[fk - setkaBBkvadr]) / dBBZ2;
 
@@ -129,10 +129,10 @@ complex<double>DifZ(long int& fk, std::vector<complex<double> >& fka, int& p) {
 
 }
 
-complex<double>DifX(long int& N, std::vector<complex<double> >& fka) {
+complex<double>DifX(int& N, std::vector<complex<double> >& fka) {
 	complex<double> k;
-	long int fk = (N - N % setkaBB);
-	long int Nz = (fk - fk % setkaBBkvadr);
+	int fk = (N - N % setkaBB);
+	int Nz = (fk - fk % setkaBBkvadr);
 
 	if (fk - Nz != 0 && (fk - setkaBBminus * setkaBB) != Nz) {
 		return k = (fka[N + setkaBB] - fka[N - setkaBB]) / dBBX2;
@@ -146,16 +146,17 @@ complex<double>DifX(long int& N, std::vector<complex<double> >& fka) {
 }
 
 
-std::vector<complex<double> >& Oblast2(int oblast, int size, int Ngarmonik, double dt1,  std::vector<complex<double> >& BEXTvectorx,std::vector<complex<double> >& BEXTvectorz, std::vector<double>& Kxvector,std::vector<double>& Kzvector, std::vector<complex<double> >& IEy, std::vector<complex<double> >& bx, std::vector<complex<double> >& bz, std::vector<complex<double> >& fk,
+void PERTURBATION_OF_MODES_DISTRIBUTION(int oblast, int size, int Ngarmonik,  std::vector<complex<double> >& BEXTvectorx,std::vector<complex<double> >& BEXTvectorz, std::vector<double>& Kxvector,std::vector<double>& Kzvector, std::vector<complex<double> >& IEy, std::vector<complex<double> >& bx, std::vector<complex<double> >& bz, std::vector<complex<double> >& fk,
 	std::vector<complex<double> >& fk2cel, std::vector<complex<double> >& f0k2cel, double NUU, std::vector<complex<double> >& parallel_mas1) {
-	//#pragma omp parallel for
+
 	for (int p = 0; p < Ngarmonik / size; p++)
 	{
 		int zero = 0;
 		int preal = p + oblast * Ngarmonik / size;
-		complex<double> Bx = bx[preal];
-		complex<double> Bz = bz[preal];
-		complex<double> IIEy = I * IEy[preal];
+
+		complex<double> Bx = bx[p];
+		complex<double> Bz = bz[p];
+		complex<double> IIEy = I * IEy[p];
 		for (int z = 0; z < setkaBB; z++) {
 			int BBZnomerk = setkaBBkvadr * z;
 			double BBZrl = -BBZmax + z * dBBZ;
@@ -164,9 +165,9 @@ std::vector<complex<double> >& Oblast2(int oblast, int size, int Ngarmonik, doub
 				double BBXrl = -BBXmax + j * dBBX;
 				for (int k = 0; k < setkaBB; k++) {
 					int BBXnomerk = p * setkaBBkub + BBZnomerk + BBXnomer + k;
-					long int BBXnomerkF0 = BBXnomer + BBZnomerk + k;
-					long int BBXnomerkreal = preal * setkaBBkub + BBZnomerk + BBXnomer + k;
-					double BBYrl = -BBYmax + k * dBBY; //настоящий полярный угол
+					int BBXnomerkF0 = BBXnomer + BBZnomerk + k;
+
+					double BBYrl = -BBYmax + k * dBBY; 
 					
 
 					complex<double> df0x = DifX(BBXnomerkF0, f0k2cel);
@@ -175,10 +176,10 @@ std::vector<complex<double> >& Oblast2(int oblast, int size, int Ngarmonik, doub
 					complex<double> df0g = (BBZrl * df0y - BBYrl * df0z);
 					complex<double> df0a = (BBYrl * df0x - BBXrl * df0y);
 
-					complex<double> dfa = (BBXrl * DifZ(BBXnomerkreal, fk2cel, preal) - BBZrl * DifX(BBXnomerkreal, fk2cel));
+					complex<double> dfa = (BBXrl * DifZ(BBXnomerk, fk2cel, p) - BBZrl * DifX(BBXnomerk, fk2cel));
 
 
-					parallel_mas1[BBXnomerk] = fk[BBXnomerkreal] -dt1*NUU*fk2cel[BBXnomerkreal]- dt1 * (I * BBXrl * Kxvector[preal] * fk2cel[BBXnomerkreal]+I * BBZrl * Kzvector[preal] * fk2cel[BBXnomerkreal]  + C3 * (2. * MAGNIT * dfa - 2. * IIEy * df0y + 2. * (BEXTvectorz[preal]+Bz) * df0a+ 2. * (BEXTvectorx[preal]+Bx) * df0g));		// основной цикл
+					parallel_mas1[BBXnomerk] = fk[BBXnomerk] -dt*NUU*fk2cel[BBXnomerk]- dt * (I * BBXrl * Kxvector[preal] * fk2cel[BBXnomerk]+I * BBZrl * Kzvector[preal] * fk2cel[BBXnomerk]  + C3 * (2. * MAGNIT * dfa - 2. * IIEy * df0y + 2. * (BEXTvectorz[preal]+Bz) * df0a+ 2. * (BEXTvectorx[preal]+Bx) * df0g));	
 
 				}
 
@@ -188,71 +189,105 @@ std::vector<complex<double> >& Oblast2(int oblast, int size, int Ngarmonik, doub
 	}
 }
 
-void  Oblast3(int oblast, int size, int Ngarmonik, double dt1,  std::vector<complex<double> >& BEXTvectorx,std::vector<complex<double> >& BEXTvectorz, std::vector<double>& Kxvector,std::vector<double>& Kzvector,  std::vector<complex<double> >& IEy1, std::vector<complex<double> >& bx1, std::vector<complex<double> >& bz1, std::vector<complex<double> >& fk2,
-	std::vector<complex<double> >& f0k2, std::vector<complex<double> >& f0k2cel, std::vector<complex<double> >& f0kcel, std::vector<complex<double> >& f0k_MAXW, double NUU, std::vector<complex<double> >& parallel_mas2) {
-	complex<double> dfx;
-	complex<double> dfy;
-	complex<double> dfz;
-	complex<double> dfa;
-	
-	complex<double> dfg;
-	int BBZnomerk;
-	long int BBXnomerk;
-	int BBZnomerkMAS;
-	for (int p = 0; p < Ngarmonik; p++)
-	{
+void PERTURBATION_OF_UNIFORM_DISTRIBUTION(int oblast, int size, int Ngarmonik, std::vector<double>& Kxvector,std::vector<double>& Kzvector,  std::vector<complex<double> >& IEy1, std::vector<complex<double> >& bx1,
+	 std::vector<complex<double> >& bz1, std::vector<complex<double> >& fk2,  std::vector<complex<double> >& parallel_mas2) {
+
+	for (int p = 0; p < Ngarmonik / size; p++) {
 		int zero = 0;
 
 		complex<double> Bx = bx1[p];
 		complex<double> Bz = bz1[p];
 		complex<double> IIEy = I * IEy1[p];
 
-		//#pragma omp parallel for
-		for (int z = oblast * setkaBB / size; z < (oblast + 1) * setkaBB / size; z++) {
-			BBZnomerkMAS = setkaBBkvadr * (z - oblast * setkaBB / size);
-			BBZnomerk = setkaBBkvadr * z;
+		for (int z = 0; z < setkaBB; z++) {
+
+			int BBZnomerk = setkaBBkvadr * z;
 			double BBZrl = -BBZmax + z * dBBZ;
 
-
 			for (int j = 0; j < setkaBB; j++) {
-				long int BBXnomer = j * setkaBB;
+				int BBXnomer = j * setkaBB;
 				double BBXrl = -BBXmax + j * dBBX;
 				for (int k = 0; k < setkaBB; k++) {
-					BBXnomerk = p * setkaBBkub + BBZnomerk + BBXnomer + k;
-					long int BBXnomerkF0 = BBZnomerk + BBXnomer + k;
-					long int BBXnomerkF0MAS = BBZnomerkMAS + BBXnomer + k;
+					int BBXnomerkF0 = BBZnomerk + BBXnomer + k;
+					int BBXnomerk = p * setkaBBkub + BBXnomerkF0;
+
 
 					double BBYrl = -BBYmax + k * dBBY;
 	
-					dfx = DifX(BBXnomerk, fk2);
-					dfy = DifY(BBXnomerk, fk2);
-					dfz = DifZ(BBXnomerk, fk2, p);
+					complex<double> dfx = DifX(BBXnomerk, fk2);
+					complex<double> dfy = DifY(BBXnomerk, fk2);
+					complex<double> dfz = DifZ(BBXnomerk, fk2, p);
 
-					dfg = (BBZrl * dfy - BBYrl * dfz);
-					dfa = (BBYrl * dfx - BBXrl * dfy);
+					complex<double> dfg = (BBZrl * dfy - BBYrl * dfz);
+					complex<double> dfa = (BBYrl * dfx - BBXrl * dfy);
 
-					complex<double> df0a = (BBXrl * DifZ(BBXnomerkF0, f0k2, zero) - BBZrl * DifX(BBXnomerkF0, f0k2));
-
-
-					if (p > 0.5) {
-						complex<double> yh1 =  Bz * conj(dfa)-IIEy * conj(dfy) + Bx * conj(dfg);
-						parallel_mas2[BBXnomerkF0MAS] = parallel_mas2[BBXnomerkF0MAS] - dt1 * 2 * C3 * real(yh1);
+	
+					complex<double> yh1 =  Bz * conj(dfa)-IIEy * conj(dfy) + Bx * conj(dfg);
+					parallel_mas2[BBXnomerkF0] = parallel_mas2[BBXnomerkF0] - dt * 2 * C3 * real(yh1);
 
 
-					}
-					else {
-
-						complex<double> yh1 = MAGNIT * df0a - IIEy  * conj(dfy) + Bz * conj(dfa)+ Bx * conj(dfg);
-						parallel_mas2[BBXnomerkF0MAS] = f0kcel[BBXnomerkF0] - dt1 * 2 * C3 * real(yh1)-dt1 *NUU*(f0k2[BBXnomerkF0]-f0k_MAXW[BBXnomerkF0]);
-					}
 				}
 
 			}
 		}
 	}
-
+}
+void  PERTURBATION_OF_UNIFORM_DISTRIBUTION_MP(int oblast, int size, std::vector<complex<double> >& f0k2, std::vector<complex<double> >& f0k2cel, std::vector<complex<double> >& f0k_MAXW, double NUU) {
+	int zero = 0;
+	for (int z = 0; z < setkaBB; z++) {
+		int BBZnomerk = setkaBBkvadr * z;
+		double BBZrl = -BBZmax + z * dBBZ;
+		for (int j = 0; j < setkaBB; j++) {
+			int BBXnomer = j * setkaBB;
+			double BBXrl = -BBXmax + j * dBBX;
+			for (int k = 0; k < setkaBB; k++) {
+				int BBXnomerkF0 = BBZnomerk + BBXnomer + k;
+				complex<double> df0a = (BBXrl * DifZ(BBXnomerkF0, f0k2, zero) - BBZrl * DifX(BBXnomerkF0, f0k2));	
+				f0k2cel[BBXnomerkF0] = f0k2cel[BBXnomerkF0] - dt * 2 * C3 * real(MAGNIT * df0a)-dt *NUU*(f0k2[BBXnomerkF0]-f0k_MAXW[BBXnomerkF0]);
+			}
+		}
+	}
 
 }
+
+double C4 = 2. * sqrt(2.) * Pi / (sqrt(Pi) * Beta_perp * sqrt(1. - A));
+complex <double> SpeedIntegral(std::vector<complex<double> >& flka, double p11) {
+
+
+	complex<double> k(0, 0);
+	double BBnomer = 0;
+	double BBreal = 0;
+	double BBYrl = 0;
+	for (int z = 0; z < setkaBB; z++) {
+		double BBZnomerk = setkaBBkvadr * z;
+		for (double i = 0; i < setkaBB; i++) {
+			BBnomer = p11 * setkaBBkub + BBZnomerk + i * setkaBB;
+			BBreal = -BBXmax + i * dBBX;
+			for (double j = 0; j < setkaBB; j++) {
+				BBYrl = -BBYmax + j * dBBY;
+				k = k + C4 * flka[BBnomer + j] * BBYrl * dBBY * dBBX * dBBZ;
+			}
+		}
+	}
+	return k;
+}
+
+void WEIBEL_FIELDS(int& oblast, int& size, int& Ngarmonik,std::vector<double>& Kxvector,std::vector<double>& Kzvector, std::vector<complex<double> >& IEylast, std::vector<complex<double> >& bzlast,std::vector<complex<double> >& bxlast,
+	std::vector<complex<double> >& IEy, std::vector<complex<double> >& bz,std::vector<complex<double> >& bx, std::vector<complex<double> >& IEy1, std::vector<complex<double> >& bz1,std::vector<complex<double> >& bx1,
+std::vector<complex<double> >& IEy1last, std::vector<complex<double> >& bz1last, std::vector<complex<double> >& bx1last,std::vector<complex<double> >& fk, std::vector<complex<double> >& fkcel) {
+
+	for (int p = 0; p < Ngarmonik/ size; p++) {
+		int preal = p + oblast * Ngarmonik / size;
+		bz1[p] = bz1last[p] -Kxvector[preal]*IEylast[p] * dt;
+		bx1[p] = bx1last[p] +Kzvector[preal]*IEylast[p] * dt;
+		complex <double> Integ = SpeedIntegral(fk, p);
+		IEy[p] = IEylast[p] + dt * (Kxvector[preal] * bz1[p] -Kzvector[preal] * bx1[p]- I * Integ);
+		IEy1[p] = (IEy[p] + IEylast[p]) / 2.;
+		bz[p] = bzlast[p] - Kxvector[preal] * IEy1[p] * dt;
+		bx[p] = bxlast[p] + Kzvector[preal] * IEy1[p] * dt;
+	}
+}
+
 
 complex <double> Vysrednekvadr(std::vector<complex<double> >& fka) {
 
@@ -340,27 +375,6 @@ complex <double> Vperpsrednekvadr(std::vector<complex<double> >& fka) {
 
 }
 
-double C4 = 2. * sqrt(2.) * Pi / (sqrt(Pi) * Beta_perp * sqrt(1. - A));
-complex <double> SpeedIntegral(std::vector<complex<double> >& flka, double p11) {
-
-
-	complex<double> k(0, 0);
-	double BBnomer = 0;
-	double BBreal = 0;
-	double BBYrl = 0;
-	for (int z = 0; z < setkaBB; z++) {
-		double BBZnomerk = setkaBBkvadr * z;
-		for (double i = 0; i < setkaBB; i++) {
-			BBnomer = p11 * setkaBBkub + BBZnomerk + i * setkaBB;
-			BBreal = -BBXmax + i * dBBX;
-			for (double j = 0; j < setkaBB; j++) {
-				BBYrl = -BBYmax + j * dBBY;
-				k = k + C4 * flka[BBnomer + j] * BBYrl * dBBY * dBBX * dBBZ;
-			}
-		}
-	}
-	return k;
-}
 
 
 complex <double> Konc(std::vector<complex<double> >& fka) {
@@ -391,10 +405,7 @@ int main(int argc, char** argv)
 {
 
 	double endtime;
-	//double itime = omp_get_wtime( );
 	double starttime;
-
-	//omp_set_num_threads(10);
 
 
 	double Bext = 0.;
@@ -439,9 +450,12 @@ int main(int argc, char** argv)
 
 	}
 
-	
+	vector <complex<double> > Bx;
+	vector <complex<double> > Bz;
+		
 	vector <complex<double> > parallel_mas1;
 	vector <complex<double> > parallel_mas2;
+	vector <complex<double> > parallel_mas3;
 	vector <complex<double> > bz;
 	vector <complex<double> > bz1; // половинное мп	
 	vector <complex<double> > bzlast;
@@ -549,7 +563,6 @@ int main(int argc, char** argv)
 				//сосисочный бимаксвелл
 				f0k2[BBZnomer + BBXnomer + k] = 1 / (Beta_perp * pow(Pi, 1.5) * Beta_perp * BetaperpsqrtA) * exp(-pow(BBXrl / Beta_perp, 2.) - pow(BBYrl / BetaperpsqrtA, 2.) - pow(BBZrl / Beta_perp, 2.));
 				f0k2cel[BBZnomer + BBXnomer + k] = 1 / (Beta_perp * pow(Pi, 1.5) * Beta_perp * BetaperpsqrtA) * exp(-pow(BBXrl / Beta_perp, 2.) - pow(BBYrl / BetaperpsqrtA, 2.) - pow(BBZrl / Beta_perp, 2.));
-
 				f0_MAXW[BBZnomer + BBXnomer + k] = 1 / (Beta_perp * pow(Pi, 1.5) * Beta_perp * Beta_perp) * exp(-pow(BBXrl / Beta_perp, 2.) - pow(BBYrl / Beta_perp, 2.) - pow(BBZrl / Beta_perp, 2.));
 
 				//ненормированное тримаксвелловское распределение
@@ -573,21 +586,25 @@ int main(int argc, char** argv)
 			}
 		}
 	}
-
+	for (int i = 0; i < Ngarmonik; i++) {
+		Bx.push_back((0., 0.));
+		Bz.push_back((0., 0.));
+	}
 	int rank, size;
 	MPI_Init(&argc, &argv);
-	starttime = MPI_Wtime();
+
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 	for (int i = 0; i < setkaBBkub * Ngarmonik / size; i++) {
 		parallel_mas1.push_back((0., 0.));
 	}
-	for (int i = 0; i < setkaBBkub / size; i++) {
+	for (int i = 0; i < setkaBBkub; i++) {
 		parallel_mas2.push_back((0., 0.));
+		parallel_mas3.push_back((0., 0.));
 	}
 
-	
+		starttime = MPI_Wtime();
 	for (int i = 2; i < Tmax / dt; i++) {
 		if (i == 50) {
 			for (double ks = 0; ks < Ngarmonik; ks++) {
@@ -600,44 +617,34 @@ int main(int argc, char** argv)
 		
 		f0kcel = f0k2cel;
 	
-
-		double sqrt_VVy0 = sqrt(real(Vysrednekvadr(f0k2cel))+real(Vxsrednekvadr(f0k2cel)));
-
-		double B_MOD = 0.; double KB_MOD = 0.; double K2B_MOD = 0.;
-
-		for (int p = 0; p < Ngarmonik; p++) {
-				B_MOD = B_MOD + (pow(abs(bxlast[p] + 0.0000000001), 2)+pow(abs(bzlast[p] + 0.0000000001), 2));
-				KB_MOD = KB_MOD + sqrt(Kxvector[p] *Kxvector[p]+Kzvector[p] *Kzvector[p])*(pow(abs(bxlast[p] + 0.0000000001), 2)+pow(abs(bzlast[p] + 0.0000000001), 2));
-				K2B_MOD = K2B_MOD + (Kxvector[p] *Kxvector[p]+Kzvector[p] *Kzvector[p])*(pow(abs(bxlast[p] + 0.0000000001), 2)+pow(abs(bzlast[p] + 0.0000000001), 2));
-		}
+		double NU_effective =0;
 		
-
-
-		double NU_effective = 3 / 64. * BetaperpsqrtA * BetaperpsqrtA * B_MOD* B_MOD/ KB_MOD/sqrt_VVy0;
-
-
-
-
-		Oblast3(rank, size, Ngarmonik, dt, BEXTvectorx,BEXTvectorz,  Kxvector,Kzvector, IEy1last, bx1last, bz1last,fk, f0k2, f0k2cel, f0kcel,f0_MAXW,NU_effective, parallel_mas2);
-
-		MPI_Allgather(parallel_mas2.data(), setkaBBkub / size, MPI_DOUBLE_COMPLEX, f0k2cel.data(), setkaBBkub / size, MPI_DOUBLE_COMPLEX, MPI_COMM_WORLD);
-
-		Oblast2(rank, size, Ngarmonik, dt, BEXTvectorx,BEXTvectorz,  Kxvector,Kzvector, IEylast, bxlast, bzlast,fk, fkcel, f0k2cel,NU_effective, parallel_mas1);
-
-		MPI_Allgather(parallel_mas1.data(), Ngarmonik * setkaBBkub / size, MPI_DOUBLE_COMPLEX, fk.data(), Ngarmonik * setkaBBkub / size, MPI_DOUBLE_COMPLEX, MPI_COMM_WORLD);
-
-
+		fill(parallel_mas2.begin(), parallel_mas2.end(), complex<double>(0., 0.));
+		PERTURBATION_OF_UNIFORM_DISTRIBUTION(
+			rank, size, 
+			Ngarmonik, Kxvector,Kzvector, IEy1last, bx1last, bz1last,fk, parallel_mas2
+		);
+		MPI_Barrier(MPI_COMM_WORLD);  // Синхронизация процессов
+		MPI_Reduce(parallel_mas2.data(), parallel_mas3.data(), setkaBBkub, MPI_DOUBLE_COMPLEX, MPI_SUM, 0, MPI_COMM_WORLD);
 		if (rank == 0) {
-			for (int p = 0; p < Ngarmonik; p++) {
-				bz1[p] = bz1last[p] -Kxvector[p]*IEylast[p] * dt;
-				bx1[p] = bx1last[p] +Kzvector[p]*IEylast[p] * dt;
-				complex <double> Integ = SpeedIntegral(fk, p);
-				IEy[p] = IEylast[p] + dt * (Kxvector[p] * bz1[p] -Kzvector[p] * bx1[p]- I * Integ);
-				IEy1[p] = (IEy[p] + IEylast[p]) / 2.;
-				bz[p] = bzlast[p] - Kxvector[p] * IEy1[p] * dt;
-				bx[p] = bxlast[p] + Kzvector[p] * IEy1[p] * dt;
-			}
-			int pk = i;
+			transform(f0k2cel.begin(), f0k2cel.end(), parallel_mas3.begin(), f0k2cel.begin(), std::plus<complex<double> >());
+		}
+
+		PERTURBATION_OF_UNIFORM_DISTRIBUTION_MP(
+			rank, size, 
+			f0k2, f0k2cel,f0_MAXW,NU_effective
+		);
+		MPI_Barrier(MPI_COMM_WORLD);  // Синхронизация процессов
+		MPI_Bcast(f0k2cel.data(), setkaBBkub, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);	
+		PERTURBATION_OF_MODES_DISTRIBUTION(rank, size,Ngarmonik, BEXTvectorx,BEXTvectorz,  Kxvector,Kzvector, IEylast, bxlast, bzlast,fk, fkcel, f0k2cel,NU_effective, parallel_mas1);
+		fk = parallel_mas1;	
+
+		WEIBEL_FIELDS(rank, size, Ngarmonik,Kxvector,Kzvector, IEylast,bzlast, bxlast,IEy,bz, bx,IEy1,bz1, bx1,IEy1last,bz1last, bx1last,fk,fkcel);
+		MPI_Gather(bx.data(), Ngarmonik / size, MPI_DOUBLE_COMPLEX, Bx.data(), Ngarmonik / size, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
+		MPI_Gather(bz.data(), Ngarmonik / size, MPI_DOUBLE_COMPLEX, Bz.data(), Ngarmonik / size, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
+
+		int pk = i;
+		if (rank == 0) {
 			if (pk % 5 == 0) {
 				double VVx0 = real(Vxsrednekvadr(f0k2cel));
 				double VVy0 = real(Vysrednekvadr(f0k2cel));
@@ -646,7 +653,7 @@ int main(int argc, char** argv)
 				double Areal = 2. * (VVy0) / (VVperp0)-1;
 				double Bmodkvadr = 0.;
 				for (double it = 0; it < Ngarmonikconst; it++) {
-					Bmodkvadr = Bmodkvadr + pow(abs(bx[it]), 2)+ pow(abs(bz[it]), 2);
+					Bmodkvadr = Bmodkvadr + pow(abs(Bx[it]), 2)+ pow(abs(Bz[it]), 2);
 
 				}
 
@@ -655,8 +662,8 @@ int main(int argc, char** argv)
 
 				for (double p = 0; p < Ngarmonikconst; p++) {
 					double ip = p * Tmax + i;
-					CMFt2000 << real(bz[p]) << " ";
-					CMFt2001 << real(bx[p]) << " ";
+					CMFt2000 << real(Bz[p]) << " ";
+					CMFt2001 << real(Bx[p]) << " ";
 
 				}
 
@@ -672,9 +679,7 @@ int main(int argc, char** argv)
 				//CMFt32 << ArealSrednKVADR << ",";
 			}
 			if (pk - 10 == 0) {
-
-
-				
+	
 				CMFt0 << '\n' << pk << '\n';
 				for (double z = 0; z < setkaBB; z++) {
 
@@ -685,8 +690,6 @@ int main(int argc, char** argv)
 							double BBXnomerk2 = z * setkaBB + k;
  							f0_proect[BBXnomerk2]=f0_proect[BBXnomerk2]+real(f0k2cel[BBXnomerk])*dBBX;
 						}
-
-
 					}
 				}
 
@@ -699,17 +702,11 @@ int main(int argc, char** argv)
 					CMFt0 << ";";
 				}
 				CMFt0 << '\n' << '\n' << '\n';
-
-
 			}
 
 			if (pk - 700 == 0) {
-
-
 				CMFt0 << '\n' << pk << '\n';
-
 				for (double z = 0; z < setkaBB; z++) {
-
 					for (double j = 0; j < setkaBB; j++) {
 						double BBXnomer = j * setkaBB;
 						for (double k = 0; k < setkaBB; k++) {
@@ -717,8 +714,6 @@ int main(int argc, char** argv)
 							double BBXnomerk2 = z * setkaBB + k;
  							f0_proect[BBXnomerk2]=f0_proect[BBXnomerk2]+real(f0k2cel[BBXnomerk])*dBBX;
 						}
-
-
 					}
 				}
 
@@ -731,16 +726,10 @@ int main(int argc, char** argv)
 					CMFt0 << ";";
 				}
 				CMFt0 << '\n' << '\n' << '\n';
-
-
 			}
 			if (pk - 850 == 0) {
-
-
-
 				CMFt0 << '\n' << pk << '\n';
 				for (double z = 0; z < setkaBB; z++) {
-
 					for (double j = 0; j < setkaBB; j++) {
 						double BBXnomer = j * setkaBB;
 						for (double k = 0; k < setkaBB; k++) {
@@ -748,8 +737,6 @@ int main(int argc, char** argv)
 							double BBXnomerk2 = z * setkaBB + k;
  							f0_proect[BBXnomerk2]=f0_proect[BBXnomerk2]+real(f0k2cel[BBXnomerk])*dBBX;
 						}
-
-
 					}
 				}
 
@@ -762,18 +749,12 @@ int main(int argc, char** argv)
 					CMFt0 << ";";
 				}
 				CMFt0 << '\n' << '\n' << '\n';
-
-
 			}
 
 
 				if (pk - 1000 == 0) {
-
-
-
 				CMFt0 << '\n' << pk << '\n';
 				for (double z = 0; z < setkaBB; z++) {
-
 					for (double j = 0; j < setkaBB; j++) {
 						double BBXnomer = j * setkaBB;
 						for (double k = 0; k < setkaBB; k++) {
@@ -781,8 +762,6 @@ int main(int argc, char** argv)
 							double BBXnomerk2 = z * setkaBB + k;
  							f0_proect[BBXnomerk2]=f0_proect[BBXnomerk2]+real(f0k2cel[BBXnomerk])*dBBX;
 						}
-
-
 					}
 				}
 
@@ -799,9 +778,6 @@ int main(int argc, char** argv)
 
 			}
 	if (pk - 1150 == 0) {
-
-
-
 				CMFt0 << '\n' << pk << '\n';
 				for (double z = 0; z < setkaBB; z++) {
 
@@ -826,79 +802,33 @@ int main(int argc, char** argv)
 					CMFt0 << ";";
 				}
 				CMFt0 << '\n' << '\n' << '\n';
-
-
 			}
-	if (pk - 1300 == 0) {
-
-
-
-				CMFt0 << '\n' << pk << '\n';
-				for (double z = 0; z < setkaBB; z++) {
-
-					for (double j = 0; j < setkaBB; j++) {
-						double BBXnomer = j * setkaBB;
-						for (double k = 0; k < setkaBB; k++) {
-							double BBXnomerk = z * setkaBBkvadr + BBXnomer + k;
-							double BBXnomerk2 = z * setkaBB + k;
- 							f0_proect[BBXnomerk2]=f0_proect[BBXnomerk2]+real(f0k2cel[BBXnomerk])*dBBX;
-						}
-
-
-					}
-				}
-
-				for (double z = 0; z < setkaBB; z++) {
-					for (double j = 0; j < setkaBB; j++) {											
-						double BBXnomerk2 = z * setkaBB + j;							
- 						CMFt0 << f0_proect[BBXnomerk2] << " ";
-						f0_proect[BBXnomerk2]=0;
-					}
-					CMFt0 << ";";
-				}
-				CMFt0 << '\n' << '\n' << '\n';
-
-
-			}
-
-		
 		}
 
 		
 		f0k = f0k2;
+		NU_effective=0;
 
-		
 
 
-		
-		MPI_Bcast(bx1.data(), Ngarmonik, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
-		MPI_Bcast(IEy1.data(), Ngarmonik, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
-		MPI_Bcast(bx.data(), Ngarmonik, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
-		MPI_Bcast(IEy.data(), Ngarmonik, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
-		MPI_Bcast(bz.data(), Ngarmonik, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
-		MPI_Bcast(bz1.data(), Ngarmonik, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
-
-		B_MOD = 0.; KB_MOD = 0.; K2B_MOD = 0.;
-
-		for (int p = 0; p < Ngarmonik; p++) {
-				
-				B_MOD = B_MOD + (pow(abs(bx1[p] + 0.0000000001), 2)+pow(abs(bz1[p] + 0.0000000001), 2));
-				KB_MOD = KB_MOD + sqrt(Kxvector[p] *Kxvector[p]+Kzvector[p] *Kzvector[p])*(pow(abs(bx1[p] + 0.0000000001), 2)+pow(abs(bz1[p] + 0.0000000001), 2));
-				K2B_MOD = K2B_MOD + (Kxvector[p] *Kxvector[p]+Kzvector[p] *Kzvector[p])*(pow(abs(bx1[p] + 0.0000000001), 2)+pow(abs(bz1[p] + 0.0000000001), 2));
+		fill(parallel_mas2.begin(), parallel_mas2.end(), complex<double>(0., 0.));
+		PERTURBATION_OF_UNIFORM_DISTRIBUTION(
+			rank, size, 
+			Ngarmonik, Kxvector,Kzvector, IEylast, bxlast, bzlast,fkcel,parallel_mas2
+		);
+		MPI_Barrier(MPI_COMM_WORLD);  // Синхронизация процессов
+		MPI_Reduce(parallel_mas2.data(), parallel_mas3.data(), setkaBBkub, MPI_DOUBLE_COMPLEX, MPI_SUM, 0, MPI_COMM_WORLD);
+		if (rank == 0) {
+			transform(f0k2.begin(), f0k2.end(), parallel_mas3.begin(), f0k2.begin(), std::plus<complex<double> >());
 		}
-		sqrt_VVy0 = sqrt(real(Vysrednekvadr(f0k2))+real(Vxsrednekvadr(f0k2)));
-		NU_effective =3 / 64. * BetaperpsqrtA * BetaperpsqrtA * B_MOD* B_MOD/ KB_MOD/sqrt_VVy0;
-
-	
-		Oblast3(rank, size, Ngarmonik, dt, BEXTvectorx,BEXTvectorz, Kxvector,Kzvector, IEylast, bxlast, bzlast, fkcel, f0k2cel, f0k2, f0k, f0_MAXW, NU_effective, parallel_mas2);
-
-		MPI_Allgather(parallel_mas2.data(), setkaBBkub / size, MPI_DOUBLE_COMPLEX, f0k2.data(), setkaBBkub / size, MPI_DOUBLE_COMPLEX, MPI_COMM_WORLD);
-
-		Oblast2(rank, size, Ngarmonik, dt, BEXTvectorx,BEXTvectorz,Kxvector,Kzvector, IEy1, bx1, bz1, fkcel, fk, f0k2,NU_effective, parallel_mas1);
-		MPI_Allgather(parallel_mas1.data(), Ngarmonik * setkaBBkub / size, MPI_DOUBLE_COMPLEX, fkcel.data(), Ngarmonik * setkaBBkub / size, MPI_DOUBLE_COMPLEX, MPI_COMM_WORLD);
-
-
-
+		PERTURBATION_OF_UNIFORM_DISTRIBUTION_MP(
+			rank, size, 
+			f0k2cel, f0k2,f0_MAXW,NU_effective
+		);
+		MPI_Barrier(MPI_COMM_WORLD);  // Синхронизация процессов
+		MPI_Bcast(f0k2.data(), setkaBBkub, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);	
+		PERTURBATION_OF_MODES_DISTRIBUTION(rank, size,Ngarmonik, BEXTvectorx,BEXTvectorz,  Kxvector,Kzvector, IEy1, bx1, bz1,fkcel, fk, f0k2,NU_effective, parallel_mas1);
+		fkcel = parallel_mas1;	
 
 		bx1last = bx1;
 		IEy1last = IEy1;
@@ -907,11 +837,6 @@ int main(int argc, char** argv)
 		bz1last = bz1;
 		bzlast = bz;	
 
-
-		//MPI_Bcast(b1last.data(), Ngarmonik, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
-		//MPI_Bcast(Vb1last.data(), Ngarmonik, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
-		//MPI_Bcast(blast.data(), Ngarmonik, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
-		//MPI_Bcast(Vblast.data(), Ngarmonik, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
 
 	}
 
