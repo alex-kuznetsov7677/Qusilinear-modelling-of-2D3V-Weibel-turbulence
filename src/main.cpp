@@ -25,8 +25,8 @@ auto config = ReadConfig("config.txt");
 int Ngarmonik = 160;
 
 double dk = 0.2;
-double MAGNIT =2.;
-double A = -10;
+double MAGNIT =0.15;
+double A = -0.3;
 double Beta_perp = 0.1;
 double BetaperpsqrtA = Beta_perp * sqrt(1 - A);
 double Pi = 3.14159265;
@@ -49,8 +49,8 @@ double BBZmax = BBXmax;
 double dBBX2 = dBBX * 2;
 double dBBZ2 = dBBZ * 2;
 
-double Tmax = 10.;				// גנולÿ נאבמעû ןנמדנאללû
-double dt = 0.04;
+double Tmax = 5000.;				// גנולÿ נאבמעû ןנמדנאללû
+double dt = 0.4;
 
 
 
@@ -236,7 +236,7 @@ int main(int argc, char** argv)
 	if (rank == 0) {
 		starttime = MPI_Wtime();
 	}
-
+	double NU_effective=0;
 	for (int i = 2; i < Tmax / dt; i++) {
 		if (i == 50) {
 			for (double ks = 0; ks < Ngarmonik; ks++) {
@@ -249,7 +249,6 @@ int main(int argc, char** argv)
 		
 		f0kcel = f0k2cel;
 	
-		double NU_effective =0;
 		
 		fill(parallel_mas2.begin(), parallel_mas2.end(), complex<double>(0., 0.));
 		PERTURBATION_OF_UNIFORM_DISTRIBUTION(
@@ -274,7 +273,15 @@ int main(int argc, char** argv)
 		WEIBEL_FIELDS(rank, size, Ngarmonik,Kxvector,Kzvector, IEylast,bzlast, bxlast,IEy,bz, bx,IEy1,bz1, bx1,IEy1last,bz1last, bx1last,fk,fkcel);
 		MPI_Gather(bx.data(), Ngarmonik / size, MPI_DOUBLE_COMPLEX, Bx.data(), Ngarmonik / size, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
 		MPI_Gather(bz.data(), Ngarmonik / size, MPI_DOUBLE_COMPLEX, Bz.data(), Ngarmonik / size, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
-
+		
+		if (rank==0){
+			double Bmodkvadr=0;
+			for (int it = 0; it < Ngarmonik; ++it) {
+        		Bmodkvadr = Bmodkvadr + pow(abs(Bx[it]), 2)+ pow(abs(Bz[it]), 2);
+    		}
+    		NU_effective=Bmodkvadr/(8*Pi);	
+		}
+		MPI_Bcast(&NU_effective, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);	
 		int pk = i;
 		if (rank == 0 && pk % 5 == 0) {
 			double time = pk*dt;
@@ -285,7 +292,6 @@ int main(int argc, char** argv)
 		}
 
 		f0k = f0k2;
-		NU_effective=0;
 
 		fill(parallel_mas2.begin(), parallel_mas2.end(), complex<double>(0., 0.));
 		PERTURBATION_OF_UNIFORM_DISTRIBUTION(

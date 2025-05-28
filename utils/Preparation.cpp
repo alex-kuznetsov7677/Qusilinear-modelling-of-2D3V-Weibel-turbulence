@@ -35,7 +35,7 @@ void  Postanovka1(std::vector<double>& Kxvector, std::vector<double>& Kzvector) 
 	double Ngarmonik_phi = 5;
 	//double Ngarmonik_phi = 10;
 	for (double i = 0; i < Ngarmonik_mod; i++) {
-		Kmod.push_back(0.2 + i * 0.045);
+		Kmod.push_back(0.1 + i * 0.013);
 	}
 	for (double i = 0; i < Ngarmonik_phi; i++) {
 		Kphi.push_back(i*3.1415926535/5);
