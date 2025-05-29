@@ -17,10 +17,9 @@ complex <double> ENERGY_Y(const std::vector<complex<double> >& fka) {
 		double BBZnomerk = setkaBBkvadr * z;
 		for (double i = 0; i < setkaBB; i++) {
 			BBnomer = BBZnomerk + i * setkaBB;
-			double BBXrl = -BBXmax + i * dBBX;
 			for (double j = 0; j < setkaBB; j++) {
-				BBYrl = -BBYmax + j * dBBY;
-				k = k + fka[BBnomer + j] * BBYrl * BBYrl * dBBY * dBBX * dBBZ;
+				BBYrl =Vminy + j * Vstepy;
+				k = k + fka[BBnomer + j] * BBYrl * BBYrl * Vstepy * Vstepx * Vstepz;
 			}
 		}
 	}
@@ -35,10 +34,9 @@ complex <double> ENERGY_X(const std::vector<complex<double> >& fka) {
 		double BBZnomerk = setkaBBkvadr * z;
 		for (double i = 0; i < setkaBB; i++) {
 			BBnomer = BBZnomerk + i * setkaBB;
-			double BBXrl = -BBXmax + i * dBBX;
+			double BBXrl = Vminx + i * Vstepx;
 			for (double j = 0; j < setkaBB; j++) {
-				BBYrl = -BBYmax + j * dBBY;
-				k = k + fka[BBnomer + j] * BBXrl * BBXrl * dBBY * dBBX * dBBZ;
+				k = k + fka[BBnomer + j] * BBXrl * BBXrl * Vstepy * Vstepx * Vstepz;
 			}
 		}
 	}
@@ -47,19 +45,13 @@ complex <double> ENERGY_X(const std::vector<complex<double> >& fka) {
 complex <double> ENERGY_Z(const std::vector<complex<double> >& fka) {
 	complex<double> k(0, 0);
 	double BBnomer = 0;
-	double BBreal = 0;
-	double BBYrl = 0;
 	for (int z = 0; z < setkaBB; z++) {
 		double BBZnomerk = setkaBBkvadr * z;
-		double BBZrl = -BBZmax + z * dBBZ;
-
-
+		double BBZrl =  Vminz + z * Vstepz;
 		for (double i = 0; i < setkaBB; i++) {
 			BBnomer = BBZnomerk + i * setkaBB;
-			double BBXrl = -BBXmax + i * dBBX;
 			for (double j = 0; j < setkaBB; j++) {
-				BBYrl = -BBYmax + j * dBBY;
-				k = k + fka[BBnomer + j] * BBZrl * BBZrl * dBBY * dBBX * dBBZ;
+				k = k + fka[BBnomer + j] * BBZrl * BBZrl * Vstepy * Vstepx * Vstepz;
 			}
 		}
 	}
@@ -69,19 +61,16 @@ complex <double> ENERGY_Z(const std::vector<complex<double> >& fka) {
 complex <double> ENERGY_PERP(const std::vector<complex<double> >& fka) {
 	complex<double> k(0, 0);
 	double BBnomer = 0;
-	double BBreal = 0;
-	double BBYrl = 0;
 	for (int z = 0; z < setkaBB; z++) {
 		double BBZnomerk = setkaBBkvadr * z;
-		double BBZrl = -BBZmax + z * dBBZ;
+		double BBZrl =  Vminz + z * Vstepz;
 
 
 		for (double i = 0; i < setkaBB; i++) {
 			BBnomer = BBZnomerk + i * setkaBB;
-			double BBXrl = -BBXmax + i * dBBX;
+			double BBXrl = Vminx + i * Vstepx;
 			for (double j = 0; j < setkaBB; j++) {
-
-				k = k + fka[BBnomer + j] * (BBZrl * BBZrl + BBXrl * BBXrl) * dBBY * dBBX * dBBZ;
+				k = k + fka[BBnomer + j] * (BBZrl * BBZrl + BBXrl * BBXrl) *Vstepy * Vstepx * Vstepz;
 			}
 		}
 	}
@@ -90,17 +79,12 @@ complex <double> ENERGY_PERP(const std::vector<complex<double> >& fka) {
 complex <double> DENSITY(const std::vector<complex<double> >& fka) {
 	complex<double> k(0, 0);
 	double BBnomer = 0;
-	double BBreal = 0;
-	double BBYrl = 0;
 	for (int z = 0; z < setkaBB; z++) {
 		double BBZnomerk = setkaBBkvadr * z;
-
 		for (double i = 0; i < setkaBB; i++) {
 			BBnomer = BBZnomerk + i * setkaBB;
-			double BBXrl = -BBXmax + i * dBBX;
 			for (double j = 0; j < setkaBB; j++) {
-				BBYrl = -BBYmax + j * dBBY;
-				k = k + fka[BBnomer + j] * dBBY * dBBX * dBBZ;
+				k = k + fka[BBnomer + j] * Vstepy * Vstepx * Vstepz;
 			}
 		}
 	}

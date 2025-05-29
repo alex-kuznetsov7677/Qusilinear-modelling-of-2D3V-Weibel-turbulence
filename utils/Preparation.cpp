@@ -4,46 +4,26 @@
 #include <cmath>
 
 #include "my_variables.h"
+#include "ConfigReader.h"
 using std::vector;
-// лучева€ сетка. —охран€ет аксиальную симметрию, но нарушает спектральную плотность гармоник. 
-/*void  Postanovka1(std::vector<double>& Kxvector,std::vector<double>& Kzvector){
-	vector <double> Kmod;
-	vector <double> Kphi;
-	double Ngarmonik_mod = 14;
-	double Ngarmonik_phi = 6;
-	for (double i = 0; i <Ngarmonik_mod ; i++) {
-		Kmod.push_back(0.3+i*0.15);
-	}
-	for (double i = 0; i < Ngarmonik_phi; i++) {
-		Kphi.push_back(i*Pi/6.);
-	}
-	for (double i = 0; i <Ngarmonik_mod ; i++) {
-		for (double j = 0; j < Ngarmonik_phi; j++) {
-			Kxvector[j*Ngarmonik_mod+i]=Kmod[i]*cos(Kphi[j]);
-			Kzvector[j*Ngarmonik_mod+i]=Kmod[i]*sin(Kphi[j]);
-		}
-	}
-
-
-
-}*/
 
 void  Postanovka1(std::vector<double>& Kxvector, std::vector<double>& Kzvector) {
+	auto config = ReadConfig("config.txt");
 	vector <double> Kmod;
 	vector <double> Kphi;
-	double Ngarmonik_mod = 32;
-	double Ngarmonik_phi = 5;
+	int Ngarmonik_r = static_cast<int>(config["Ngarmonik_r"]);
+	int Ngarmonik_phi =static_cast<int>(config["Ngarmonik_phi"]);
 	//double Ngarmonik_phi = 10;
-	for (double i = 0; i < Ngarmonik_mod; i++) {
-		Kmod.push_back(0.1 + i * 0.013);
+	for (double i = 0; i < Ngarmonik_r; i++) {
+		Kmod.push_back(config["kmin_r"] + i * config["kstep_r"]);
 	}
 	for (double i = 0; i < Ngarmonik_phi; i++) {
-		Kphi.push_back(i*3.1415926535/5);
+		Kphi.push_back(i*3.1415926535/Ngarmonik_phi);
 	}
-	for (double i = 0; i < Ngarmonik_mod; i++) {
+	for (double i = 0; i < Ngarmonik_r; i++) {
 		for (double j = 0; j < Ngarmonik_phi; j++) {
-			Kxvector[j * Ngarmonik_mod + i] = Kmod[i] * cos(Kphi[j]);
-			Kzvector[j * Ngarmonik_mod + i] = Kmod[i] * sin(Kphi[j]);
+			Kxvector[j * Ngarmonik_r + i] = Kmod[i] * cos(Kphi[j]);
+			Kzvector[j * Ngarmonik_r + i] = Kmod[i] * sin(Kphi[j]);
 		}
 	}
 }

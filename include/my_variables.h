@@ -8,8 +8,6 @@
 
 extern int Ngarmonik;
 
-
-extern double dk;
 extern double MAGNIT;
 extern double A;
 extern double Beta_perp;
@@ -21,18 +19,17 @@ extern int setkaBBkvadr;
 extern int setkaBBminus;
 extern int setkaBBkub;
 
-extern double dBBX;
-extern double dBBY ;
-extern double dBBZ ;
-extern double dBBY2 ;
-extern double dBBYkvadr ;
-extern double dBBXkvadr ;
-extern double dBBXdBBY ;
-extern double BBXmax ;
-extern double BBYmax;
-extern double BBZmax;
-extern double dBBX2 ;
-extern double dBBZ2;
+extern double Vstepx;
+extern double Vstepy;
+extern double Vstepz;
+extern double Vstepy2;
+
+
+extern double Vminx;
+extern double Vminy;
+extern double Vminz;
+extern double Vstepx2;
+extern double Vstepz2;
 
 
 

@@ -10,29 +10,28 @@
 #include "my_variables.h" 
 
 void InitializeOutputFiles(OutputFiles &files, const std::map<std::string, double>& config) {
-    files.CMFt100000.open("output/DESCRIPTIONRe[B]__170kiam.txt");
-    
+    files.CMFt100000.open("output/DESCRIPTIONRe[B]__172kiam.txt");
     files.CMFt100000 << "=== CONFIGURATION PARAMETERS ===\n";
   	for (const auto& pair : config) {
         files.CMFt100000 << pair.first << " = " << pair.second << "\n";
     }
 	
-	files.CMFt2000.open("output/abs[Bz]__170kiamMATLAB.txt");
-	files.CMFt2001.open("output/abs[Bx]__170kiamMATLAB.txt");
-	files.CMFt.open("output/output__170kiam.txt");
-	files.CMFt0.open("output/ReFUNC000_170kiam.txt");
-	files.CMFt1301.open("output/Re,Wy0]__170kiam.txt");
-	files.CMFt1303.open("output/Re,Wx0]__170kiam.txt");
-	files.CMFt1302.open("output/Im,Areal]__170kiam.txt");
-	files.CMFt30.open("output/Re[BkSREDN]__170kiam.txt");
-	files.CMFt31.open("output/Re[AREALWyWx]_170kiam.txt");
-	files.CMFt32.open("output/Re[Time]__170kiam.txt");
+	files.CMFt2000.open("output/abs[Bz]__172kiamMATLAB.txt");
+	files.CMFt2001.open("output/abs[Bx]__172kiamMATLAB.txt");
+	files.CMFt.open("output/output__172kiam.txt");
+	files.CMFt0.open("output/ReFUNC000_172kiam.txt");
+	files.CMFt1301.open("output/Re,Wy0]__172kiam.txt");
+	files.CMFt1303.open("output/Re,Wx0]__172kiam.txt");
+	files.CMFt1302.open("output/Im,Areal]__172kiam.txt");
+	files.CMFt30.open("output/Re[BkSREDN]__172kiam.txt");
+	files.CMFt31.open("output/Re[AREALWyWx]_172kiam.txt");
+	files.CMFt32.open("output/Re[Time]__172kiam.txt");
 }
 void OutputFiles::log_execution_time(double time){
-	CMFt << "Execution time:" << time << '\n';
+	CMFt100000  << "Execution time:" << time << '\n';
 }
 void OutputFiles::log_number_MPI_processes(int number){
-	CMFt << "Number of MPIprocesses:" << number << '\n';
+	CMFt100000  << "Number of MPIprocesses:" << number << '\n';
 }
 void OutputFiles::log_fields(
     double time,
@@ -81,7 +80,7 @@ void OutputFiles::log_distribution(
 			for (double k = 0; k < setkaBB; k++) {
 				double BBXnomerk = z * setkaBBkvadr + BBXnomer + k;
 				double BBXnomerk2 = z * setkaBB + k;
- 				f0_proect[BBXnomerk2]=f0_proect[BBXnomerk2]+real(f0k2cel[BBXnomerk])*dBBX;
+ 				f0_proect[BBXnomerk2]=f0_proect[BBXnomerk2]+real(f0k2cel[BBXnomerk])*Vstepx;
 			}
 		}
 	}

@@ -21,36 +21,38 @@ using namespace std;
 
 auto config = ReadConfig("config.txt");
 
+double start_level_modes=config["start_level_modes"];
+int Ngarmonik = static_cast<int>(config["Ngarmonik_phi"])*static_cast<int>(config["Ngarmonik_r"]);
 
-int Ngarmonik = 160;
+double MAGNIT =config["MAGNIT"];
+double A = -config["A"];
+int type_collisions = static_cast<int>(config["type_collisions"]); 
 
-double dk = 0.2;
-double MAGNIT =0.15;
-double A = -0.3;
-double Beta_perp = 0.1;
+double Beta_perp = config["Beta_perp"];
 double BetaperpsqrtA = Beta_perp * sqrt(1 - A);
 double Pi = 3.14159265;
 
-int setkaBB = 80;
+int setkaBB = static_cast<int>(config["setkaBB"]);
 int setkaBBkvadr = setkaBB * setkaBB;
 int setkaBBminus = setkaBB - 1;
 int setkaBBkub = setkaBB * setkaBB * setkaBB;
 
-double dBBX = Beta_perp*7./setkaBB;
-double dBBY = dBBX * sqrt(1. - A);
-double dBBZ = dBBX;
-double dBBY2 = dBBY * 2;
-double dBBYkvadr = dBBY * dBBY;
-double dBBXkvadr = dBBX * dBBX;
-double dBBXdBBY = 4 * dBBY * dBBX;
-double BBXmax = Beta_perp * 3.5 - (dBBX / 2.);
-double BBYmax = BBXmax * sqrt(1. - A);
-double BBZmax = BBXmax;
-double dBBX2 = dBBX * 2;
-double dBBZ2 = dBBZ * 2;
+double Vstepx = Beta_perp*config["ratio_Vstepx_multiple_setkaBB_to_Beta_perp"]/setkaBB;
+double Vstepy = Vstepx * sqrt(1. - A);
+double Vstepz = Vstepx;
+double Vstepy2 = Vstepy * 2;
 
-double Tmax = 5000.;				// время работы программы
-double dt = 0.4;
+
+double Vminx = -Beta_perp * config["ratio_Vstepx_multiple_setkaBB_to_Beta_perp"]/2.+ (Vstepx / 2.);
+double Vminy = Vminx * sqrt(1. - A);
+double Vminz = Vminx;
+double Vstepx2 = Vstepx * 2;
+double Vstepz2 =Vstepz * 2;
+
+
+double Tmax = config["Tmax"];
+double dt = config["dt"];
+
 
 
 
@@ -68,7 +70,6 @@ int main(int argc, char** argv)
 
 	double endtime;
 	double starttime;
-
 
 	double Bext = 0.;
 	int df = 6230023;
@@ -90,13 +91,10 @@ int main(int argc, char** argv)
 	Postanovka1(Kxvector,Kzvector);
 
 
-	vector <double> rand_nu;
 	for (double i = 0; i < Ngarmonik; i++) {
-		double t = i;
-		double phi(sqrt(2) * i / 5.);
 		complex< double > z(exp(0));
-		BEXTvectorz.push_back(z * 0.001*Kxvector[i]/sqrt(Kxvector[i]*Kxvector[i]+Kzvector[i]*Kzvector[i]));
-		BEXTvectorx.push_back(-z * 0.001*Kzvector[i]/sqrt(Kxvector[i]*Kxvector[i]+Kzvector[i]*Kzvector[i]));
+		BEXTvectorz.push_back(z * start_level_modes*Kxvector[i]/sqrt(Kxvector[i]*Kxvector[i]+Kzvector[i]*Kzvector[i]));
+		BEXTvectorx.push_back(-z * start_level_modes*Kzvector[i]/sqrt(Kxvector[i]*Kxvector[i]+Kzvector[i]*Kzvector[i]));
 
 	}
 
@@ -139,31 +137,7 @@ int main(int argc, char** argv)
 	vector <double> Areal;
 
 
-	for (int i = 0; i < Ngarmonik + 10; i++) {
-		bx.push_back((0., 0.));
-		bx1.push_back((0., 0.));
-		bxlast.push_back((0., 0.));
-		bx1last.push_back((0., 0.));
 
-		bz.push_back((0., 0.));
-		bz1.push_back((0., 0.));
-		bzlast.push_back((0., 0.));
-		bz1last.push_back((0., 0.));
-
-		IEy.push_back((0., 0.));
-		IEy1.push_back((0., 0.));
-		IEylast.push_back((0., 0.));
-		IEy1last.push_back((0., 0.));
-	}
-
-	for (int i = 0; i < setkaBBkub * Ngarmonik; i++) {
-
-		fk.push_back((0., 0.));
-		fkcel.push_back((0., 0.));
-		
-
-	
-	}
 	for (int i = 0; i < setkaBBkub; i++) {
 		f0k.push_back((0., 0.));
 		f0k2.push_back((0., 0.));
@@ -180,12 +154,12 @@ int main(int argc, char** argv)
 	cout<< Beta_potok;
 	for (int z = 0; z < setkaBB; z++) {
 		double BBZnomer = z * setkaBBkvadr;
-		double BBZrl = -BBZmax + z * dBBZ;
+		double BBZrl = Vminz + z * Vstepz;
 		for (double j = 0; j < setkaBB; j++) {
 			double BBXnomer = j * setkaBB;
-			double BBXrl = -BBXmax + j * dBBX;
+			double BBXrl = Vminx + j * Vstepx;
 			for (double k = 0; k < setkaBB; k++) {
-				double BBYrl = -BBYmax + k * dBBY;
+				double BBYrl = Vminy + k * Vstepy;
 				//сосисочный бимаксвелл
 				f0k2[BBZnomer + BBXnomer + k] = 1 / (Beta_perp * pow(Pi, 1.5) * Beta_perp * BetaperpsqrtA) * exp(-pow(BBXrl / Beta_perp, 2.) - pow(BBYrl / BetaperpsqrtA, 2.) - pow(BBZrl / Beta_perp, 2.));
 				f0k2cel[BBZnomer + BBXnomer + k] = 1 / (Beta_perp * pow(Pi, 1.5) * Beta_perp * BetaperpsqrtA) * exp(-pow(BBXrl / Beta_perp, 2.) - pow(BBYrl / BetaperpsqrtA, 2.) - pow(BBZrl / Beta_perp, 2.));
@@ -233,6 +207,32 @@ int main(int argc, char** argv)
 		parallel_mas2.push_back((0., 0.));
 		parallel_mas3.push_back((0., 0.));
 	}
+	for (int i = 0; i < Ngarmonik/size; i++) {
+		bx.push_back((0., 0.));
+		bx1.push_back((0., 0.));
+		bxlast.push_back((0., 0.));
+		bx1last.push_back((0., 0.));
+
+		bz.push_back((0., 0.));
+		bz1.push_back((0., 0.));
+		bzlast.push_back((0., 0.));
+		bz1last.push_back((0., 0.));
+
+		IEy.push_back((0., 0.));
+		IEy1.push_back((0., 0.));
+		IEylast.push_back((0., 0.));
+		IEy1last.push_back((0., 0.));
+	}
+
+	for (int i = 0; i < setkaBBkub * Ngarmonik/size; i++) {
+
+		fk.push_back((0., 0.));
+		fkcel.push_back((0., 0.));
+		
+
+	}
+	
+	
 	if (rank == 0) {
 		starttime = MPI_Wtime();
 	}
@@ -274,7 +274,7 @@ int main(int argc, char** argv)
 		MPI_Gather(bx.data(), Ngarmonik / size, MPI_DOUBLE_COMPLEX, Bx.data(), Ngarmonik / size, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
 		MPI_Gather(bz.data(), Ngarmonik / size, MPI_DOUBLE_COMPLEX, Bz.data(), Ngarmonik / size, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD);
 		
-		if (rank==0){
+		if (rank==0 && type_collisions==1){
 			double Bmodkvadr=0;
 			for (int it = 0; it < Ngarmonik; ++it) {
         		Bmodkvadr = Bmodkvadr + pow(abs(Bx[it]), 2)+ pow(abs(Bz[it]), 2);

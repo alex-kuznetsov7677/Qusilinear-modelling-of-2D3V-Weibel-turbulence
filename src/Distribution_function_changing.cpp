@@ -8,31 +8,21 @@
 using std::complex;
 using std::vector;
 
-
-
-
 complex<double>DifY(int& fk, std::vector<complex<double> >& fka) {
 	complex<double> k;
-
 	if (fk - setkaBB != 0 && (fk - setkaBBminus) % setkaBB != 0) {
-		return k = (fka[fk + 1] - fka[fk - 1]) / dBBY2;
-
-
+		return k = (fka[fk + 1] - fka[fk - 1]) / Vstepy2;
 	}
 	else {
 		return k = 0;
-
 	}
-
 }
 complex<double>DifZ(int& fk, std::vector<complex<double> >& fka, int& p) {
 	complex<double> k;
 
 	int N = fk - fk % setkaBBkvadr;
 	if (N % setkaBBkub != 0 && (N - setkaBBminus * setkaBBkvadr) % setkaBBkub != 0) {
-		return k = (fka[fk + setkaBBkvadr] - fka[fk - setkaBBkvadr]) / dBBZ2;
-
-
+		return k = (fka[fk + setkaBBkvadr] - fka[fk - setkaBBkvadr]) / Vstepz2;
 	}
 	else {
 		return k = 0;
@@ -47,14 +37,11 @@ complex<double>DifX(int& N, std::vector<complex<double> >& fka) {
 	int Nz = (fk - fk % setkaBBkvadr);
 
 	if (fk - Nz != 0 && (fk - setkaBBminus * setkaBB) != Nz) {
-		return k = (fka[N + setkaBB] - fka[N - setkaBB]) / dBBX2;
-
-
+		return k = (fka[N + setkaBB] - fka[N - setkaBB]) / Vstepx2;
 	}
 	else {
 		return k = 0;
 	}
-
 }
 
 
@@ -71,15 +58,15 @@ void PERTURBATION_OF_MODES_DISTRIBUTION(int oblast, int size, int Ngarmonik,  st
 		complex<double> IIEy = I * IEy[p];
 		for (int z = 0; z < setkaBB; z++) {
 			int BBZnomerk = setkaBBkvadr * z;
-			double BBZrl = -BBZmax + z * dBBZ;
+			double BBZrl = Vminz + z * Vstepz;
 			for (int j = 0; j < setkaBB; j++) {
 				int BBXnomer = j * setkaBB;
-				double BBXrl = -BBXmax + j * dBBX;
+				double BBXrl = Vminx + j * Vstepx;
 				for (int k = 0; k < setkaBB; k++) {
 					int BBXnomerk = p * setkaBBkub + BBZnomerk + BBXnomer + k;
 					int BBXnomerkF0 = BBXnomer + BBZnomerk + k;
 
-					double BBYrl = -BBYmax + k * dBBY; 
+					double BBYrl =Vminy + k * Vstepy; 
 					
 
 					complex<double> df0x = DifX(BBXnomerkF0, f0k2cel);
@@ -114,26 +101,22 @@ void PERTURBATION_OF_UNIFORM_DISTRIBUTION(int oblast, int size, int Ngarmonik, s
 		for (int z = 0; z < setkaBB; z++) {
 
 			int BBZnomerk = setkaBBkvadr * z;
-			double BBZrl = -BBZmax + z * dBBZ;
+			double BBZrl = Vminz + z * Vstepz;
 
 			for (int j = 0; j < setkaBB; j++) {
 				int BBXnomer = j * setkaBB;
-				double BBXrl = -BBXmax + j * dBBX;
+				double BBXrl = Vminx + j * Vstepx;
 				for (int k = 0; k < setkaBB; k++) {
 					int BBXnomerkF0 = BBZnomerk + BBXnomer + k;
 					int BBXnomerk = p * setkaBBkub + BBXnomerkF0;
 
-
-					double BBYrl = -BBYmax + k * dBBY;
-	
+					double BBYrl =Vminy + k * Vstepy; 	
 					complex<double> dfx = DifX(BBXnomerk, fk2);
 					complex<double> dfy = DifY(BBXnomerk, fk2);
 					complex<double> dfz = DifZ(BBXnomerk, fk2, p);
-
 					complex<double> dfg = (BBZrl * dfy - BBYrl * dfz);
 					complex<double> dfa = (BBYrl * dfx - BBXrl * dfy);
 
-	
 					complex<double> yh1 =  Bz * conj(dfa)-IIEy * conj(dfy) + Bx * conj(dfg);
 					parallel_mas2[BBXnomerkF0] = parallel_mas2[BBXnomerkF0] - dt * 2 * C3 * real(yh1);
 
@@ -148,10 +131,10 @@ void  PERTURBATION_OF_UNIFORM_DISTRIBUTION_MP(int oblast, int size, std::vector<
 	int zero = 0;
 	for (int z = 0; z < setkaBB; z++) {
 		int BBZnomerk = setkaBBkvadr * z;
-		double BBZrl = -BBZmax + z * dBBZ;
+		double BBZrl = Vminz + z * Vstepz;
 		for (int j = 0; j < setkaBB; j++) {
 			int BBXnomer = j * setkaBB;
-			double BBXrl = -BBXmax + j * dBBX;
+			double BBXrl = Vminx + j * Vstepx;
 			for (int k = 0; k < setkaBB; k++) {
 				int BBXnomerkF0 = BBZnomerk + BBXnomer + k;
 				complex<double> df0a = (BBXrl * DifZ(BBXnomerkF0, f0k2, zero) - BBZrl * DifX(BBXnomerkF0, f0k2));	

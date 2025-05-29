@@ -8,19 +8,16 @@ using std::vector;
 
 complex <double> SpeedIntegral(std::vector<complex<double> >& flka, double p11) {
 
-
 	complex<double> k(0, 0);
 	double BBnomer = 0;
-	double BBreal = 0;
 	double BBYrl = 0;
 	for (int z = 0; z < setkaBB; z++) {
 		double BBZnomerk = setkaBBkvadr * z;
 		for (double i = 0; i < setkaBB; i++) {
 			BBnomer = p11 * setkaBBkub + BBZnomerk + i * setkaBB;
-			BBreal = -BBXmax + i * dBBX;
 			for (double j = 0; j < setkaBB; j++) {
-				BBYrl = -BBYmax + j * dBBY;
-				k = k + C4 * flka[BBnomer + j] * BBYrl * dBBY * dBBX * dBBZ;
+				BBYrl =Vminy + j * Vstepy;
+				k = k + C4 * flka[BBnomer + j] * BBYrl * Vstepy * Vstepx * Vstepz;
 			}
 		}
 	}
